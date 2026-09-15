@@ -1,0 +1,17 @@
+# 个人配置：包含真实账号和 DPAPI 加密密码，绝对不要上传
+campus-login.config.json
+
+# 运行日志
+logs/
+*.log
+
+# Windows 系统文件
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# PowerShell / 编辑器临时文件
+*.ps1~
+*.bak
+.vscode/
+.idea/

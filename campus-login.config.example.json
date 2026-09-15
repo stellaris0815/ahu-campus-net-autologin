@@ -1,0 +1,21 @@
+{
+    "PortalPageUrl": "http://172.16.253.3/a79.htm",
+    "PortalHost": "172.16.253.3",
+    "LoginMethod": 1,
+    "JsVersion": "3.3.2",
+    "Username": "your_account@cmccwx",
+    "AccountSuffix": "",
+    "AccountPrefix": "",
+    "EncryptedPassword": "run setup-campus-login.ps1 to generate",
+    "MaxAttempts": 8,
+    "RetrySeconds": 15,
+    "AlwaysTryLogin": false,
+    "WatchdogIntervalMinutes": 5,
+    "CampusProbeAttempts": 6,
+    "CampusProbeRetrySeconds": 10,
+    "ConnectivityCheckUrls": [
+        "http://www.msftconnecttest.com/connecttest.txt",
+        "http://connectivitycheck.gstatic.com/generate_204",
+        "http://neverssl.com/"
+    ]
+}
