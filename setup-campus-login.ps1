@@ -57,4 +57,4 @@ $config | ConvertTo-Json -Depth 5 | Set-Content -Path $ConfigPath -Encoding UTF8
 Write-Host ""
 Write-Host "配置已写入：$ConfigPath"
 Write-Host "运行 .\campus-login.ps1 -Once 测试登录。"
-Write-Host "运行 .\campus-login.ps1 -Watchdog 可常驻检测，掉线自动重连。"
+Write-Host "运行 .\campus-login.ps1 -Watchdog 可自动登录并在成功后退出。"

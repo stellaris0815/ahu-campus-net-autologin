@@ -527,7 +527,7 @@ if ($Watchdog) {
         Write-Log "校园网探测 $probe/$campusProbeAttempts：$($config.PortalPageUrl)"
         if (Test-PortalReachable $config) {
             $onCampus = $true
-            Write-Log "检测到校园网，进入看门狗模式。"
+            Write-Log "检测到校园网，开始自动登录。"
             break
         }
         if ($probe -lt $campusProbeAttempts) {
@@ -537,16 +537,22 @@ if ($Watchdog) {
     }
 
     if (-not $onCampus) {
-        Write-Log "未检测到校园网，退出看门狗模式，避免后台空转。" "WARN"
+        Write-Log "未检测到校园网，自动退出。" "WARN"
         exit 0
     }
 
-    Write-Log "看门狗模式启动：每 $watchdogIntervalMinutes 分钟检查一次，掉线会自动重登。"
-    while ($true) {
-        [void](Invoke-LoginWithRetry $config $attempts $retrySeconds)
-        Write-Log "本轮检测完成，${watchdogIntervalMinutes} 分钟后再次检测。"
-        Start-Sleep -Seconds ($watchdogIntervalMinutes * 60)
+    $loginResult = Invoke-LoginWithRetry $config $attempts $retrySeconds
+    if ($loginResult) {
+        if (-not $NoClose) {
+            Write-Log "登录成功/已联网，即将自动关闭窗口。"
+            Start-Sleep -Milliseconds 800
+            [Environment]::Exit(0)
+        }
+        exit 0
     }
+
+    Write-Log "自动登录未完成，保留窗口方便查看日志。" "WARN"
+    exit 1
 }
 
 if (Invoke-LoginWithRetry $config $attempts $retrySeconds) {
