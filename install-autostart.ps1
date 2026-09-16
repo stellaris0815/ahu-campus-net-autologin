@@ -8,6 +8,8 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $LoginScript = Join-Path $ScriptDir "campus-login.ps1"
 $ConfigPath = Join-Path $ScriptDir "campus-login.config.json"
 $TaskName = "CampusNetworkAutoLogin"
+$VbsName = "CampusNetworkAutoLogin.vbs"
+$VbsPath = Join-Path $ScriptDir $VbsName
 $StartupFolder = [Environment]::GetFolderPath("Startup")
 $StartupFile = Join-Path $StartupFolder "CampusNetworkAutoLogin.cmd"
 
@@ -33,10 +35,26 @@ if ($intervalMinutes -lt 1) {
     $intervalMinutes = 5
 }
 
+function New-HiddenLauncher {
+    param(
+        [string]$Path,
+        [string]$ScriptPath,
+        [string]$ExtraArgs
+    )
+
+    $vbs = @"
+Set ws = CreateObject("Wscript.Shell")
+ws.Run "powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File ""$ScriptPath""$ExtraArgs", 0, False
+"@
+    Set-Content -Path $Path -Value $vbs -Encoding ASCII
+}
+
+New-HiddenLauncher -Path $VbsPath -ScriptPath $LoginScript -ExtraArgs $watchdogArg
+
 try {
     $action = New-ScheduledTaskAction `
-        -Execute "powershell.exe" `
-        -Argument "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$LoginScript`"$watchdogArg"
+        -Execute "wscript.exe" `
+        -Argument "`"$VbsPath`""
 
     if ($OneShot) {
         $trigger = New-ScheduledTaskTrigger -AtLogOn
@@ -62,7 +80,7 @@ try {
         -Action $action `
         -Trigger $trigger `
         -Settings $settings `
-        -Description "自动登录安徽大学校园网 Dr.COM 认证页面。" `
+        -Description "自动登录安徽大学校园网 Dr.COM 认证页面（无窗口）。" `
         -Force `
         -ErrorAction Stop | Out-Null
 
@@ -82,6 +100,7 @@ try {
     else {
         Write-Host "模式：定时自动重连（每 $intervalMinutes 分钟运行一次，登录成功后退出）。"
     }
+    Write-Host "通过 wscript 无窗口运行，不会遮挡游戏或其他应用。"
     Write-Host "当前 Windows 用户登录后会自动运行。"
 }
 catch {
@@ -91,7 +110,7 @@ catch {
 
     $cmd = @(
         "@echo off",
-        "start `"`" /min powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$LoginScript`"$watchdogArg"
+        "wscript.exe `"$VbsPath`""
     )
     Set-Content -Path $StartupFile -Value $cmd -Encoding ASCII
 
@@ -104,5 +123,6 @@ catch {
         Write-Host "模式：已降级为开机自动登录一次；定时自动重连需要管理员权限创建任务计划程序。"
         Write-Host "请右键 PowerShell 以管理员身份运行：.\install-autostart.ps1"
     }
+    Write-Host "通过 wscript 无窗口运行，不会遮挡游戏或其他应用。"
     Write-Host "当前 Windows 用户登录后会自动运行。"
 }

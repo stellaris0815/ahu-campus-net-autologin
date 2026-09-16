@@ -1,6 +1,8 @@
 ﻿$ErrorActionPreference = "Stop"
 
 $TaskName = "CampusNetworkAutoLogin"
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$VbsPath = Join-Path $ScriptDir "CampusNetworkAutoLogin.vbs"
 $StartupFolder = [Environment]::GetFolderPath("Startup")
 $StartupFile = Join-Path $StartupFolder "CampusNetworkAutoLogin.cmd"
 
@@ -20,4 +22,12 @@ if (Test-Path $StartupFile) {
 }
 else {
     Write-Host "未找到启动文件：$StartupFile"
+}
+
+if (Test-Path $VbsPath) {
+    Remove-Item -LiteralPath $VbsPath -Force
+    Write-Host "已移除无窗口启动脚本：$VbsPath"
+}
+else {
+    Write-Host "未找到无窗口启动脚本：$VbsPath"
 }
